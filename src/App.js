@@ -7,9 +7,11 @@ import LoadingSpinner from "./UI/LoadingSpinner";
 function App() {
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const fetchMoviesHandler = () => {
     setIsLoading(true);
+    setError(null);
     fetch("https://swapi.dev/api/films/")
       .then((response) => {
         return response.json();
@@ -25,19 +27,33 @@ function App() {
         });
         setMovies(transformedMovies);
         setIsLoading(false);
+      })
+      .catch((error) => {
+        setError("Error: Something went wrong!");
+        setIsLoading(false);
       });
   };
+
+  let content = <p>Found no movies.</p>;
+
+  if (error) {
+    content = <p>{error}</p>;
+  }
+
+  if (movies.length > 0) {
+    content = <MoviesList movies={movies} />;
+  }
+
+  if (isLoading) {
+    content = <LoadingSpinner />;
+  }
 
   return (
     <>
       <section>
         <button onClick={fetchMoviesHandler}>Fetch Movies</button>
       </section>
-      <section>
-        {!isLoading && movies.length > 0 && <MoviesList movies={movies} />}
-        {!isLoading && movies.length === 0 && <p>Found no movies.</p>}
-        {isLoading && <LoadingSpinner />}
-      </section>
+      <section>{content}</section>
     </>
   );
 }

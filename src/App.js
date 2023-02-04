@@ -5,9 +5,7 @@ import Cart from "./components/Cart/Cart";
 import Layout from "./components/Layout/Layout";
 import Products from "./components/Shop/Products";
 import Notification from "./components/UI/Notification";
-import { uiActions } from "./components/store";
-
-const API = process.env.REACT_APP_FIREBASE;
+import { sendCartData, fetchCartData } from "./store/cart-actions";
 
 let isInitital = true;
 
@@ -18,46 +16,18 @@ function App() {
   const notification = useSelector((state) => state.ui.notification);
 
   useEffect(() => {
-    const sendCartData = async () => {
-      dispatch(
-        uiActions.showNotification({
-          status: "pending",
-          title: "Sending...",
-          message: "Sending cart data!",
-        })
-      );
-      const response = await fetch(API, {
-        method: "PUT",
-        body: JSON.stringify(cart),
-      });
+    dispatch(fetchCartData());
+  }, [dispatch]);
 
-      if (!response.ok) {
-        throw new Error("Sendind cart data failed");
-      }
-
-      dispatch(
-        uiActions.showNotification({
-          status: "sucess",
-          title: "Sucess!",
-          message: "Send cart data sucessfully!",
-        })
-      );
-    };
-
+  useEffect(() => {
     if (isInitital) {
       isInitital = false;
       return;
     }
 
-    sendCartData().catch((error) => {
-      dispatch(
-        uiActions.showNotification({
-          status: "error",
-          title: "Error!",
-          message: "Sending cart data failed!",
-        })
-      );
-    });
+    if (cart.changed) {
+      dispatch(sendCartData(cart));
+    }
   }, [cart, dispatch]);
 
   return (

@@ -1,50 +1,32 @@
-import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import Cart from "./components/Cart/Cart";
-import Layout from "./components/Layout/Layout";
-import Products from "./components/Shop/Products";
-import Notification from "./components/UI/Notification";
-import { sendCartData, fetchCartData } from "./store/cart-actions";
+import BlogPage, { loader as postsLoader } from "./pages/Blog";
+import HomePage from "./pages/Home";
+import PostPage, { loader as postLoader } from "./pages/Post";
+import RootLayout from "./pages/Root";
 
-let isInitital = true;
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <RootLayout />,
+    children: [
+      {
+        index: true,
+        element: <HomePage />,
+      },
+      {
+        path: "posts",
+        children: [
+          { index: true, element: <BlogPage />, loader: postsLoader },
+          { path: ":id", element: <PostPage />, loader: postLoader },
+        ],
+      },
+    ],
+  },
+]);
 
 function App() {
-  const dispatch = useDispatch();
-  const toggle = useSelector((state) => state.ui.toggle);
-  const cart = useSelector((state) => state.cart);
-  const notification = useSelector((state) => state.ui.notification);
-
-  useEffect(() => {
-    dispatch(fetchCartData());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (isInitital) {
-      isInitital = false;
-      return;
-    }
-
-    if (cart.changed) {
-      dispatch(sendCartData(cart));
-    }
-  }, [cart, dispatch]);
-
-  return (
-    <>
-      {notification && (
-        <Notification
-          status={notification.status}
-          title={notification.title}
-          message={notification.message}
-        />
-      )}
-      <Layout>
-        {toggle && <Cart />}
-        <Products />
-      </Layout>
-    </>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

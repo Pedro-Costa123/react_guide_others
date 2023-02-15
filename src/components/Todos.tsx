@@ -1,13 +1,23 @@
-type TodosProps = {
-  items: string[];
-};
+import { useContext } from "react";
 
-const Todos = (props: TodosProps) => (
-  <ul>
-    {props.items.map((item) => (
-      <li key={item}>{item}</li>
-    ))}
-  </ul>
-);
+import TodoItem from "./TodoItem";
+import { TodosContext } from "../store/todos-context";
+import classes from "./Todos.module.css";
+
+const Todos = () => {
+  const todosCtx = useContext(TodosContext);
+
+  return (
+    <ul className={classes.todo}>
+      {todosCtx.items.map((item) => (
+        <TodoItem
+          key={item.id}
+          text={item.text}
+          onDelete={todosCtx.deleteTodo.bind(null, item.id)}
+        />
+      ))}
+    </ul>
+  );
+};
 
 export default Todos;
